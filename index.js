@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
+const { ObjectID } = require("mongodb");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 
@@ -39,6 +40,34 @@ async function run() {
        res.send(result);
      });
 
+
+
+app.get("/colleges/:id", async (req, res) => {
+  try {
+    const collegeId = req.params.id;
+
+    // Validate if the ID is a valid ObjectId
+    if (!ObjectId.isValid(collegeId)) {
+      return res.status(400).send("Invalid college ID");
+    }
+
+    const college = await collegeCollection.findOne({
+      _id:new ObjectId(collegeId),
+    });
+
+    if (!college) {
+      return res.status(404).send("College not found");
+    }
+
+    res.send(college);
+  } catch (error) {
+    console.error("Error searching college by ID:", error);
+    res.status(500).send("Internal server error");
+  }
+});
+
+
+    
 app.get("/", (req, res) => {
   res.send("End Game server is running");
 });
@@ -59,12 +88,4 @@ app.listen(port, () => {
   }
 }
 run().catch(console.dir);
-
-
-
-
-
-
-
-
 
